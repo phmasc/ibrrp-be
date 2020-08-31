@@ -13,6 +13,7 @@ router.get('/', async (req, res) => {
         .where('vagas').gt(0)
         .sort({ 'datatime': -1, 'createdAt': 1 })
         .limit(4)
+
     return res.send(culto)
 })
 
