@@ -1,26 +1,26 @@
 const express = require('express')
 
-const Culto = require('../models/Culto')
+const Culto = require('../models/Culto');
 
 const router = express.Router();
 
 //router.post('/register', async (req, res) => 
 
 router.get('/', async (req, res) => {
-    return res.send({ retorno: "Ok" })
+    const culto = await Culto.find()
+        .where('vagas').gt(0)
+        .sort({ 'datatime': -1, 'createdAt': 1 })
+        .limit(4)
+    return res.send(culto)
 })
 
 router.post('/create', async (req, res) => {
     const dados = req.body;
     try {
-
-        console.log(dados)
         const culto = await Culto.create(dados);
 
-        return res.send({
-            culto,
-            token: gentoken({ id: culto.id })
-        })
+        console.log(culto)
+        return res.send(culto)
     } catch (err) {
         return res.status(400).send({ err })
     }

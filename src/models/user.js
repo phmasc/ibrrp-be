@@ -22,40 +22,15 @@ const question = mongoose.model('question', questionSchema);
 
 // Schema === Tabela SQL
 const UserSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-    },
-    cpf: {
-        type: Number,
-        unique: true,
-        required: true,
-    },
-    dtNascimento: {
-        type: Date,
-        required: true,
-    },
-    email: {
-        type: String,
-        required: true,
-        lowercase: true,
-    },
-    telefone: {
-        type: String,
-        required: true,
-    },
-    password: {
-        type: String,
-        select: false
-    },
-    questions: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'question'
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
+    name: { type: String, required: true, },
+    cpf: { type: Number, unique: true, required: true, },
+    dtNascimento: { type: Date, required: true, },
+    email: { type: String, required: true, lowercase: true, },
+    telefone: { type: String, required: true, },
+    password: { type: String, select: false },
+    questions: { ref: 'question', type: mongoose.Schema.Types.ObjectId, },
+    culto_id: { ref: 'Culto', type: mongoose.Schema.Types.ObjectId },
+    createdAt: { type: Date, default: Date.now, },
 });
 
 UserSchema.pre('save', async function (next) {

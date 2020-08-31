@@ -13,6 +13,22 @@ function gentoken(params = {}) {
     })
 };
 
+router.get('/', async (req, res) => {
+    const { name, dtNascimento, cpf } = req.query;
+
+    try {
+        const isFilter = !(!(cpf || name || dtNascimento))
+        const filter = cpf ? { cpf } : { name, dtNascimento }
+
+        console.log({ filter, isFilter })
+
+        const user = await User.find(isFilter ? filter : {})
+
+        return res.send(user)
+    } catch (error) {
+        return res.status(400).send(error)
+    }
+})
 
 
 router.post('/register', async (req, res) => {

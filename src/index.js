@@ -10,6 +10,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 
 require('./controllers/authController')(app)
 require('./controllers/cultoController')(app)
+require('./controllers/warningsController')(app)
 
 
 app.get('/', (req, res) => {
