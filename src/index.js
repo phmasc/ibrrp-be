@@ -17,4 +17,7 @@ app.get('/', (req, res) => {
     res.send(`API REST IBRRP ${new Date}`)
 });
 
-app.listen(process.env.PORT || 3333, () => { console.log('Running...') });
+const host = process.env.HOST || '0.0.0.0';
+const port = process.env.PORT || 3333;
+
+app.listen(port, host, () => { console.log('Server is Running...') });
