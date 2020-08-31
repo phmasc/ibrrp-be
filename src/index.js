@@ -14,7 +14,7 @@ require('./controllers/warningsController')(app)
 
 
 app.get('/', (req, res) => {
-    res.send(`HelloWorld ${process.env.SECRET_AUTH}`)
+    res.send(`API REST IBRRP ${new Date}`)
 });
 
 app.listen(process.env.PORT || 3333, () => { console.log('Running...') });
