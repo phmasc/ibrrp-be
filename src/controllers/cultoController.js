@@ -9,9 +9,6 @@ const router = express.Router();
 router.get('/', async (req, res) => {
     const { id } = req.query;
 
-    console.log("Abacate")
-    console.log({ id })
-
     const culto = await Culto.find(id ? { _id: id } : {})
         .where('vagas').gt(0)
         .sort({ 'datatime': -1, 'createdAt': 1 })
@@ -24,7 +21,6 @@ router.post('/create', async (req, res) => {
     try {
         const culto = await Culto.create(dados);
 
-        console.log(culto)
         return res.send(culto)
     } catch (err) {
         return res.status(400).send({ err })

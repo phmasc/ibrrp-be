@@ -7,7 +7,6 @@ const User = require('../models/user')
 const router = express.Router();
 
 function gentoken(params = {}) {
-    console.log({ params })
     return jwt.sign({ params }, process.env.SECRET_AUTH, {
         expiresIn: 86400,
     })
@@ -19,8 +18,6 @@ router.get('/', async (req, res) => {
     try {
         const isFilter = !(!(cpf || name || dtNascimento))
         const filter = cpf ? { cpf } : { name, dtNascimento }
-
-        console.log({ filter, isFilter })
 
         const user = await User.find(isFilter ? filter : {})
 
@@ -56,8 +53,6 @@ router.post('/authenticate', async (req, res) => {
     const { cpf, password } = req.body;
 
     const user = await User.findOne({ cpf }).select('+password');
-
-    console.log({ user })
 
     if (!user)
         return res.status(400).send({ error: "User not found" });
