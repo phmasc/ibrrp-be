@@ -7,7 +7,12 @@ const router = express.Router();
 //router.post('/register', async (req, res) => 
 
 router.get('/', async (req, res) => {
-    const culto = await Culto.find()
+    const { id } = req.query;
+
+    console.log("Abacate")
+    console.log({ id })
+
+    const culto = await Culto.find(id ? { _id: id } : {})
         .where('vagas').gt(0)
         .sort({ 'datatime': -1, 'createdAt': 1 })
         .limit(4)
