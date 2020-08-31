@@ -1,6 +1,6 @@
 const express = require('express')
 
-const Culto = require('../models/Culto');
+const Culto = require('../models/culto');
 
 const router = express.Router();
 
