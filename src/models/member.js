@@ -21,7 +21,7 @@ const questionSchema = new mongoose.Schema({
 const question = mongoose.model('question', questionSchema);
 
 // Schema === Tabela SQL
-const UserSchema = new mongoose.Schema({
+const MemberSchema = new mongoose.Schema({
     name: { type: String, required: true, },
     cpf: { type: Number, unique: true, required: true, },
     dtNascimento: { type: Date, required: true, },
@@ -33,11 +33,9 @@ const UserSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now, },
 });
 
-UserSchema.pre('save', async function (next) {
+MemberSchema.pre('save', async function (next) {
     //this objeto que está sendo salvo
-    console.log(this.password)
     if (this.password) {
-        console.log("dentro do if")
         const hash = await bcrypt.hash(this.password, 10)
         this.password = hash
     }
@@ -45,6 +43,6 @@ UserSchema.pre('save', async function (next) {
     next();
 });
 
-const User = mongoose.model('User', UserSchema);
+const Member = mongoose.model('Member', MemberSchema);
 
-module.exports = User;
+module.exports = Member;

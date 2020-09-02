@@ -2,7 +2,7 @@ const express = require('express')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
-const User = require('../models/user')
+const User = require('../models/member')
 
 const router = express.Router();
 
@@ -45,7 +45,7 @@ router.post('/register', async (req, res) => {
             token: gentoken({ id: user.id })
         })
     } catch (err) {
-        return res.status(400).send({ err })
+        return res.status(400).send(err)
     }
 })
 
