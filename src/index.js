@@ -17,7 +17,7 @@ require('./controllers/warningsController')(app)
 
 
 app.get('/', (req, res) => {
-    res.send(`API REST IBRRP ${new Date}`)
+    res.send(`API REST IBRRP - Member ${new Date}`)
 });
 
 const host = process.env.HOST || '0.0.0.0';

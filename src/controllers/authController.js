@@ -8,7 +8,7 @@ const router = express.Router();
 
 function gentoken(params = {}) {
     return jwt.sign({ params }, process.env.SECRET_AUTH, {
-        expiresIn: 86400,
+        expiresIn: 900,
     })
 };
 
@@ -19,9 +19,12 @@ router.get('/', async (req, res) => {
         const isFilter = !(!(cpf || name || dtNascimento))
         const filter = cpf ? { cpf } : { name, dtNascimento }
 
-        const user = await User.find(isFilter ? filter : {})
+        const user = await User.findOne(isFilter ? filter : {})
 
-        return res.send(user)
+        return res.send({
+            user,
+            token: gentoken({ id: user.id })
+        })
     } catch (error) {
         return res.status(400).send(error)
     }
