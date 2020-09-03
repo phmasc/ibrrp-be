@@ -11,6 +11,7 @@ router.get('/', async (req, res) => {
 
     const culto = await Culto.find(id ? { _id: id } : {})
         .where('vagas').gt(0)
+        .where('schedule').gt(Date.now())
         .sort({ 'schedule': 1, 'createdAt': 1 })
         .limit(4)
 
