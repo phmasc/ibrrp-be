@@ -2,7 +2,9 @@ const express = require('express')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
-const User = require('../models/member')
+const User = require('../models/member');
+const Culto = require('../models/culto');
+const Warnings = require('../models/warnings');
 
 const router = express.Router();
 
@@ -76,5 +78,38 @@ router.post('/authenticate', async (req, res) => {
         token
     })
 });
+
+router.post('/booking', async (req, res) => {
+    const { id, cultoId } = req.body;
+    var type;
+
+    try {
+        if (!(await User.findOne({ "_id": id })))
+            return res.status(400).send({ error: 'User not exists' })
+
+        const culto = await Culto.findOne({ "_id": cultoId })
+
+        if (!culto)
+            return res.status(400).send({ error: "Culto not exists" })
+
+        if (culto.vagas < 1) {
+
+            type = 'apologize'
+
+        } else {
+            await Culto.updateOne({ "_id": cultoId }, { vagas: culto.vagas - 1 })
+            await User.updateOne({ '_id': id }, { 'culto_id': cultoId })
+            type = 'approved'
+        }
+
+        const warn = await Warnings.findOne({ 'type': type })
+
+        return res.send(warn)
+
+    } catch (error) {
+
+    }
+
+})
 
 module.exports = app => app.use('/auth', router)
