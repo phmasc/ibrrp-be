@@ -16,6 +16,7 @@ require('./controllers/cultoController')(app)
 require('./controllers/warningsController')(app)
 
 
+
 app.get('/', (req, res) => {
     res.send(`API REST IBRRP - Member ${new Date}`)
 });

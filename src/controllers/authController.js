@@ -6,8 +6,11 @@ const User = require('../models/member');
 const Culto = require('../models/culto');
 const Warnings = require('../models/warnings');
 
+const sendMail = require('../utils/sendMail');
+
 const router = express.Router();
 
+// Funçao para gerar um tokem aleatorio de autenticação para o usuario
 function gentoken(params = {}) {
     return jwt.sign({ params }, process.env.SECRET_AUTH, {
         expiresIn: 900,
@@ -28,19 +31,16 @@ router.get('/', async (req, res) => {
         var warn = Warnings
 
         if (user.culto_id) {
+            console.log(Date.now())
             if (user.culto_id.schedule.getTime() < Date.now()) {
                 warn = await Warnings.find({ type: "authorized" })
             } else {
                 warn = await Warnings.find({ type: "duplicate" })
-
-                warn.description = undefined;
-                //String(warn.description).replace("$culto", "user.culto_id.name")
             }
         } else {
             console.log(user)
             warn = await Warnings.find({ type: "authorized" })
         }
-
         return res.send({
             user,
             token: gentoken({ id: user.id }),
@@ -104,7 +104,8 @@ router.post('/booking', async (req, res) => {
     var type;
 
     try {
-        if (!(await User.findOne({ "_id": id })))
+        const user = await User.findOne({ "_id": id })
+        if (!user)
             return res.status(400).send({ error: 'User not exists' })
 
         const culto = await Culto.findOne({ "_id": cultoId })
@@ -121,12 +122,13 @@ router.post('/booking', async (req, res) => {
 
             Culto.findByIdAndUpdate(cultoId, { $push: { member_id: id } })
 
-
-            Culto.updateOne()
-
             await Culto.updateOne({ "_id": cultoId }, { $push: { 'member_id': id } })
             await User.updateOne({ '_id': id }, { 'culto_id': cultoId })
             type = 'approved'
+
+            const email = await Warnings.findOne({ 'type': 'emailHtml' })
+
+            await sendMail(user.email, email.title, email.description)
         }
 
         const warn = await Warnings.findOne({ 'type': type })
