@@ -21,13 +21,33 @@ router.get('/', async (req, res) => {
         const isFilter = !(!(cpf || name || dtNascimento))
         const filter = cpf ? { cpf } : { name, dtNascimento }
 
-        const user = await User.findOne(isFilter ? filter : {})
+        const user = await User
+            .findOne(isFilter ? filter : {})
+            .populate('culto_id', 'name schedule')
+
+        var warn = Warnings
+
+        if (user.culto_id) {
+            if (user.culto_id.schedule.getTime() < Date.now()) {
+                warn = await Warnings.find({ type: "authorized" })
+            } else {
+                warn = await Warnings.find({ type: "duplicate" })
+
+                warn.description = undefined;
+                //String(warn.description).replace("$culto", "user.culto_id.name")
+            }
+        } else {
+            console.log(user)
+            warn = await Warnings.find({ type: "authorized" })
+        }
 
         return res.send({
             user,
-            token: gentoken({ id: user.id })
+            token: gentoken({ id: user.id }),
+            warn
         })
     } catch (error) {
+        console.log(error)
         return res.status(400).send(error)
     }
 })
@@ -98,6 +118,13 @@ router.post('/booking', async (req, res) => {
 
         } else {
             await Culto.updateOne({ "_id": cultoId }, { vagas: culto.vagas - 1 })
+
+            Culto.findByIdAndUpdate(cultoId, { $push: { member_id: id } })
+
+
+            Culto.updateOne()
+
+            await Culto.updateOne({ "_id": cultoId }, { $push: { 'member_id': id } })
             await User.updateOne({ '_id': id }, { 'culto_id': cultoId })
             type = 'approved'
         }

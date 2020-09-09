@@ -7,6 +7,7 @@ const CultoSchema = new mongoose.Schema({
     vagas: { type: Number, required: true, },
     description: { type: String, required: true, },
     createdAt: { type: Date, default: Date.now, },
+    member_id: [{ ref: 'Member', type: mongoose.Schema.Types.ObjectId }]
 })
 
 const Culto = mongoose.model('Culto', CultoSchema);
