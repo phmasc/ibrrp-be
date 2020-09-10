@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
 router.get('/list', async (req, res) => {
     const { id } = req.query;
 
-    const culto = await Culto.find(id ? { _id: id } : {})
+    const culto = await Culto.findOne(id ? { _id: id } : {})
         .where('vagas').gt(0)
         .where('schedule').gt(Date.now())
         .sort({ 'schedule': 1, 'createdAt': 1 })

@@ -31,14 +31,12 @@ router.get('/', async (req, res) => {
         var warn = Warnings
 
         if (user.culto_id) {
-            console.log(Date.now())
             if (user.culto_id.schedule.getTime() < Date.now()) {
                 warn = await Warnings.find({ type: "authorized" })
             } else {
                 warn = await Warnings.find({ type: "duplicate" })
             }
         } else {
-            console.log(user)
             warn = await Warnings.find({ type: "authorized" })
         }
         return res.send({
