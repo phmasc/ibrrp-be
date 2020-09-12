@@ -25,7 +25,7 @@ router.get('/list', async (req, res) => {
         .where('vagas').gt(0)
         .where('schedule').gt(Date.now())
         .sort({ 'schedule': 1, 'createdAt': 1 })
-        .populate('member_id', 'name email')
+        .populate('member_id', 'name email telefone')
         .limit(4)
 
     return res.send(culto)
