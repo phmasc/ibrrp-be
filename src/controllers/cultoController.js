@@ -21,12 +21,20 @@ router.get('/', async (req, res) => {
 router.get('/list', async (req, res) => {
     const { id } = req.query;
 
-    const culto = await Culto.findOne(id ? { _id: id } : {})
-        .where('vagas').gt(0)
-        .where('schedule').gt(Date.now())
-        .sort({ 'schedule': 1, 'createdAt': 1 })
-        .populate('member_id', 'name email telefone')
-        .limit(4)
+    let culto = Culto
+    if (id) {
+        culto = await Culto.findOne({ _id: id })
+            .sort({ 'schedule': 1, 'createdAt': 1 })
+            .populate('member_id', 'name email telefone')
+
+    } else {
+        culto = await Culto.findOne({})
+            .where('vagas').gt(0)
+            .where('schedule').gt(Date.now())
+            .sort({ 'schedule': 1, 'createdAt': 1 })
+            .populate('member_id', 'name email telefone')
+
+    }
 
     return res.send(culto)
 })
