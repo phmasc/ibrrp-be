@@ -35,7 +35,6 @@ router.get('/list', async (req, res) => {
             .populate('member_id', 'name email telefone')
 
     }
-
     return res.send(culto)
 })
 
