@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 const User = require('../models/member');
 const Culto = require('../models/culto');
 const Warnings = require('../models/warnings');
-const MyLogs = require('../models/mylogs');
+//const MyLogs = require('../models/mylogs');
 
 const sendMail = require('../utils/sendMail');
 
@@ -61,7 +61,6 @@ router.get('/', async (req, res) => {
         return res.status(400).send(error)
     }
 })
-
 
 router.post('/register', async (req, res) => {
     const { cpf } = req.body;
@@ -149,5 +148,7 @@ router.post('/booking', async (req, res) => {
     }
 
 })
+
+router.put
 
 module.exports = app => app.use('/auth', router)
