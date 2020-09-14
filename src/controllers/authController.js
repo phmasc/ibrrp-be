@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken')
 const User = require('../models/member');
 const Culto = require('../models/culto');
 const Warnings = require('../models/warnings');
+const MyLogs = require('../models/mylogs');
 
 const sendMail = require('../utils/sendMail');
 
@@ -17,8 +18,15 @@ function gentoken(params = {}) {
     })
 };
 
+async function insertMyLogs(member_id, culto_id, action, description) {
+    await MyLogs.create(member_id, culto_id, action, description)
+}
+
 router.get('/', async (req, res) => {
-    const { name, dtNascimento, cpf } = req.query;
+    const { cultoId, name, dtNascimento, cpf } = req.query;
+
+    console.log({ cultoId, cpf })
+
 
     try {
         const isFilter = !(!(cpf || name || dtNascimento))
@@ -33,11 +41,14 @@ router.get('/', async (req, res) => {
         if (user.culto_id) {
             if (user.culto_id.schedule.getTime() < Date.now()) {
                 warn = await Warnings.find({ type: "authorized" })
+                //await insertMyLogs(user._id, cultoId, 'request', 'solicitacao para acessar o culto concedida')
             } else {
                 warn = await Warnings.find({ type: "duplicate" })
+                // await insertMyLogs(user._id, cultoId, 'request', 'solicitacao para acessar o culto negada por duplicacao')
             }
         } else {
             warn = await Warnings.find({ type: "authorized" })
+            // await insertMyLogs(user._id, cultoId, 'request', 'solicitacao para acessar o culto concedida')
         }
         return res.send({
             user,
@@ -46,6 +57,7 @@ router.get('/', async (req, res) => {
         })
     } catch (error) {
         console.log(error)
+        // await insertMyLogs(undefined, (cultoId ? cultoId : undefined), 'request', `solicitacao de ${name} com CPF ${cpf} para acessar o culto obteu error ${error}`)
         return res.status(400).send(error)
     }
 })
@@ -112,7 +124,6 @@ router.post('/booking', async (req, res) => {
             return res.status(400).send({ error: "Culto not exists" })
 
         if (culto.vagas < 1) {
-
             type = 'apologize'
 
         } else {
@@ -126,7 +137,7 @@ router.post('/booking', async (req, res) => {
 
             const email = await Warnings.findOne({ 'type': 'emailHtml' })
 
-            await sendMail(user.email, email.title, email.description)
+            await sendMail(user.email, `${email.title} para o ${culto.name} na data ${culto.schedule.toLocaleDateString()}`, email.description)
         }
 
         const warn = await Warnings.findOne({ 'type': type })
@@ -134,7 +145,7 @@ router.post('/booking', async (req, res) => {
         return res.send(warn)
 
     } catch (error) {
-
+        console.log({ error })
     }
 
 })
