@@ -7,13 +7,13 @@ const router = express.Router();
 //router.post('/register', async (req, res) => 
 
 router.get('/', async (req, res) => {
-    const { id } = req.query;
+    const { id, qtd, limit } = req.query;
 
     const culto = await Culto.find(id ? { _id: id } : {})
-        .where('vagas').gt(0)
+        .where('vagas').gt((qtd ? qtd : 0))
         .where('schedule').gt(Date.now())
         .sort({ 'schedule': 1, 'createdAt': 1 })
-        .limit(4)
+        .limit((limit ? parseInt(limit) : 4))
 
     return res.send(culto)
 })
