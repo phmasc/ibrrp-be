@@ -160,7 +160,30 @@ router.put('/unbooking', async (req, res) => {
 
     console.log(`phsystem - unbooking: ID ${id} tentando cancelar o cadastro no cultoId ${cultoId}`)
 
-    return res.send('Ok')
+    try {
+        const user = await User.findOne({ "_id": id })
+        if (!user) {
+            console.log(`phsystem - booking: error = User não exists`)
+            return res.status(400).send({ error: 'User not exists' })
+        }
+
+
+        const culto = await Culto.findOne({ "_id": cultoId })
+
+        if (!culto) {
+            console.log(`phsystem - booking: error = Culto não exists`)
+            return res.status(400).send({ error: "Culto not exists" })
+        }
+
+        await Culto.findByIdAndUpdate(cultoId, { $pull: { member_id: id } })
+
+        console.log(`phsystem - unbooking: ID ${id} retirado do cultoId ${cultoId}`)
+
+        return res.send({ user, culto })
+
+    } catch (error) {
+        console.log({ error })
+    }
 })
 
 module.exports = app => app.use('/auth', router)
