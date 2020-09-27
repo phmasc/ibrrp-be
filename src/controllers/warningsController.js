@@ -1,5 +1,6 @@
 const express = require('express')
 
+const gerarCode = require('../utils/gerarCode')
 
 const Warnings = require('../models/warnings')
 
@@ -30,6 +31,19 @@ router.post('/create', async (req, res) => {
     } catch (error) {
         return res.status(401).send(error)
     }
+})
+
+router.post('/code', async (req, res) => {
+    const { id, cultoId } = req.body;
+
+    console.log({ 'function': gerarCode(id, cultoId) })
+
+
+    const code = await gerarCode(id, cultoId)
+
+
+
+    res.send({ code })
 })
 
 module.exports = app => app.use('/warnings', router)

@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken')
 const User = require('../models/member');
 const Culto = require('../models/culto');
 const Warnings = require('../models/warnings');
+const History = require('../models/history')
 
 const sendMail = require('../utils/sendMail');
 
@@ -137,9 +138,15 @@ router.post('/booking', async (req, res) => {
             await User.updateOne({ '_id': id }, { 'culto_id': cultoId })
             type = 'approved'
 
-            const email = await Warnings.findOne({ 'type': 'emailHtml' })
+            const email = await Warnings.findOne({ 'type': 'emailConfirmacao' })
 
             console.log(`phsystem - booking: ID ${id} inserido no cultoId ${cultoId}`)
+
+            await History.create({
+                key: (id + '-' + cultoId),
+                member_id: id,
+                culto_id: cultoId
+            })
 
             await sendMail(user.email, `${email.title} para o ${culto.name} na data ${culto.schedule.toLocaleDateString()}`, email.description)
         }
@@ -153,6 +160,53 @@ router.post('/booking', async (req, res) => {
         console.log({ error })
     }
 
+})
+
+router.post('/checking', async (req, res) => {
+    const { userId, cultoId, check, temp } = req.body;
+
+    try {
+        const user = await User.findOne({ "_id": userId })
+        if (!user) {
+            console.log(`phsystem - booking: error = User não exists`)
+            return res.status(400).send({ error: 'User not exists' })
+        }
+
+        const culto = await Culto.findOne({ "_id": cultoId })
+
+        if (!culto) {
+            console.log(`phsystem - booking: error = Culto não exists`)
+            return res.status(400).send({ error: "Culto not exists" })
+        }
+
+        const hist = await History.findOne({ key: (userId + '-' + cultoId) })
+
+        if (hist) {
+            if (check && temp) {
+                await History.updateOne({ '_id': hist._id }, { 'check': (check === 'true'), 'temp': (temp === 'true') })
+            } else if (check) {
+                await History.updateOne({ '_id': hist._id }, { 'check': (check === 'true') })
+            } else {
+                await History.updateOne({ '_id': hist._id }, { 'temp': (temp === 'true') })
+            }
+
+            await History.updateOne({ '_id': hist._id }, { 'check': (check === 'true'), 'temp': (temp === 'true') })
+            const upHist = await History.findOne({ key: (userId + '-' + cultoId) })
+            return res.send({ upHist })
+        } else {
+            const newHist = await History.create({
+                key: (userId + '-' + cultoId),
+                member_id: userId,
+                culto_id: cultoId,
+                'check': (check === 'true'),
+                'temp': (temp === 'true')
+            })
+            return res.send({ newHist })
+        }
+    } catch (error) {
+        console.log(`phsystem - checking: userId ${userId} cultoId ${cultoId} check ${check} temp ${temp} error = ${error}`)
+        return res.status(404).send({ error })
+    }
 })
 
 router.put('/unbooking', async (req, res) => {
