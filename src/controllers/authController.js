@@ -28,14 +28,26 @@ router.get('/', async (req, res) => {
 
         const user = await User
             .findOne(isFilter ? filter : {})
-            .populate('culto_id', 'name schedule')
+            .populate('culto_id', 'name schedule isolated')
+
+
+        const culto = await Culto.findOne({ "_id": cultoId })
+
+        console.log(culto.member_id.indexOf(user._id))
+
 
         var warn = Warnings
 
         if (user.culto_id) {
-            if (user.culto_id.schedule.getTime() < Date.now()) {
+            if (culto.member_id.indexOf(user._id) > -1) {
+                warn = await Warnings.find({ type: "duplicate" })
+                console.log('phsystem - request:', user._id, cultoId, 'solicitacao para acessar o culto negada por duplicacao')
+
+            } else if ((user.culto_id.schedule.getTime() < Date.now())
+                || (!culto.isolated && culto._id !== user.culto_id)) {
                 warn = await Warnings.find({ type: "authorized" })
                 console.log('phsystem - request:', user._id, cultoId, 'solicitacao para acessar o culto concedida')
+
             } else {
                 warn = await Warnings.find({ type: "duplicate" })
                 console.log('phsystem - request:', user._id, cultoId, 'solicitacao para acessar o culto negada por duplicacao')
@@ -86,24 +98,31 @@ router.post('/authenticate', async (req, res) => {
 
     const user = await User.findOne({ cpf }).select('+password');
 
+    console.log(user)
+
+
     if (!user)
         return res.status(400).send({ error: "User not found" });
 
-    if (user.password !== '') {
-        if (password !== process.env.MASTER_PASSWORD) {
-            if (!await bcrypt.compare(password, user.password))
-                return res.status(400).send({ error: 'Invalid password' })
+    try {
+        if (user.password !== '') {
+            if (password !== process.env.MASTER_PASSWORD) {
+                if (!await bcrypt.compare(password, user.password))
+                    return res.status(400).send({ error: 'Invalid password' })
+            }
         }
+
+        user.password = undefined;
+
+        const token = gentoken({ id: user.id })
+
+        res.send({
+            user,
+            token
+        })
+    } catch (error) {
+        return res.status(400).send({ "Err": 'Usuario sem senha' })
     }
-
-    user.password = undefined;
-
-    const token = gentoken({ id: user.id })
-
-    res.send({
-        user,
-        token
-    })
 });
 
 router.post('/booking', async (req, res) => {
@@ -135,7 +154,11 @@ router.post('/booking', async (req, res) => {
             Culto.findByIdAndUpdate(cultoId, { $push: { member_id: id } })
 
             await Culto.updateOne({ "_id": cultoId }, { $push: { 'member_id': id } })
-            await User.updateOne({ '_id': id }, { 'culto_id': cultoId })
+
+            if (culto.isolated) {
+                await User.updateOne({ '_id': id }, { 'culto_id': cultoId })
+            }
+
             type = 'approved'
 
             const email = await Warnings.findOne({ 'type': 'emailConfirmacao' })
