@@ -8,6 +8,7 @@ const Warnings = require('../models/warnings');
 const History = require('../models/history')
 
 const sendMail = require('../utils/sendMail');
+const gerarCode = require('../utils/gerarCode');
 
 const router = express.Router();
 
@@ -41,7 +42,7 @@ router.get('/', async (req, res) => {
         if (user.culto_id) {
             if (culto.member_id.indexOf(user._id) > -1) {
                 warn = await Warnings.find({ type: "duplicate" })
-                console.log('phsystem - request:', user._id, cultoId, 'solicitacao para acessar o culto negada por duplicacao')
+                console.log('phsystem - request:', user._id, cultoId, 'solicitacao para acessar o culto negada por já está neste culto')
 
             } else if ((user.culto_id.schedule.getTime() < Date.now())
                 || (!culto.isolated && culto._id !== user.culto_id)) {
@@ -126,7 +127,7 @@ router.post('/authenticate', async (req, res) => {
 });
 
 router.post('/booking', async (req, res) => {
-    const { id, cultoId } = req.body;
+    const { id, cultoId, answers } = req.body;
     var type;
 
     console.log(`phsystem - booking: ID ${id} tentando se cadastro no cultoId ${cultoId}`)
@@ -159,6 +160,12 @@ router.post('/booking', async (req, res) => {
                 await User.updateOne({ '_id': id }, { 'culto_id': cultoId })
             }
 
+            if (answers) {
+                User.findByIdAndUpdate(id, { $push: { questions: answers } })
+            }
+
+
+
             type = 'approved'
 
             const email = await Warnings.findOne({ 'type': 'emailConfirmacao' })
@@ -166,10 +173,11 @@ router.post('/booking', async (req, res) => {
             console.log(`phsystem - booking: ID ${id} inserido no cultoId ${cultoId}`)
 
             await History.create({
-                key: (id + '-' + cultoId),
+                key: (id + '-' + cultoId + '-ADD'),
+                type: 'ADD',
                 member_id: id,
                 culto_id: cultoId
-            })
+            }).catch(err => console.log(err))
 
             await sendMail(user.email, `${email.title} para o ${culto.name} na data ${culto.schedule.toLocaleDateString()}`, email.description)
         }
@@ -240,7 +248,7 @@ router.put('/unbooking', async (req, res) => {
     try {
         const user = await User.findOne({ "_id": id })
         if (!user) {
-            console.log(`phsystem - booking: error = User não exists`)
+            console.log(`phsystem - booking: error = User not exists`)
             return res.status(400).send({ error: 'User not exists' })
         }
 
@@ -248,19 +256,33 @@ router.put('/unbooking', async (req, res) => {
         const culto = await Culto.findOne({ "_id": cultoId })
 
         if (!culto) {
-            console.log(`phsystem - booking: error = Culto não exists`)
+            console.log(`phsystem - booking: error = Culto not exists`)
             return res.status(400).send({ error: "Culto not exists" })
         }
 
         await Culto.findByIdAndUpdate(cultoId, { $pull: { member_id: id } })
 
+        await Culto.updateOne({ "_id": cultoId }, { vagas: culto.vagas + 1 })
+
         console.log(`phsystem - unbooking: ID ${id} retirado do cultoId ${cultoId}`)
+
+        History.create({
+            key: (id + '-' + cultoId + '-DEL'),
+            type: 'DEL',
+            member_id: id,
+            culto_id: cultoId
+        }).catch(err => console.log(err))
+
 
         return res.send({ user, culto })
 
     } catch (error) {
         console.log({ error })
     }
+})
+
+router.get('login'/ async (req, res) =>{
+    res.send("Hello World Login")
 })
 
 module.exports = app => app.use('/auth', router)

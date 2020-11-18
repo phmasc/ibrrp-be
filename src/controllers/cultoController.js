@@ -11,9 +11,11 @@ router.get('/', async (req, res) => {
 
     const culto = await Culto.find(id ? { _id: id } : {})
         .where('vagas').gt((qtd ? qtd : 0))
-        .where('schedule').gt(Date.now())
+        .where('schedule').gt(Date.now() + 2 * 60 * 60 * 1000)
         .sort({ 'schedule': 1, 'createdAt': 1 })
         .limit((limit ? parseInt(limit) : 4))
+
+
 
     return res.send(culto)
 })
@@ -25,14 +27,13 @@ router.get('/list', async (req, res) => {
     if (id) {
         culto = await Culto.findOne({ _id: id })
             .sort({ 'schedule': 1, 'createdAt': 1 })
-            .populate('member_id', 'name email telefone')
+            .populate('member_id', 'name dtNascimento')
 
     } else {
         culto = await Culto.findOne({})
-            .where('vagas').gt(0)
             .where('schedule').gt(Date.now())
             .sort({ 'schedule': 1, 'createdAt': 1 })
-            .populate('member_id', 'name email telefone')
+            .populate('member_id', 'name dtNascimento')
 
     }
     return res.send(culto)
