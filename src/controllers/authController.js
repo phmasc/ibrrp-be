@@ -31,11 +31,7 @@ router.get('/', async (req, res) => {
             .findOne(isFilter ? filter : {})
             .populate('culto_id', 'name schedule isolated')
 
-
         const culto = await Culto.findOne({ "_id": cultoId })
-
-        console.log(culto.member_id.indexOf(user._id))
-
 
         var warn = Warnings
 
@@ -108,8 +104,10 @@ router.post('/authenticate', async (req, res) => {
     try {
         if (user.password !== '') {
             if (password !== process.env.MASTER_PASSWORD) {
-                if (!await bcrypt.compare(password, user.password))
-                    return res.status(400).send({ error: 'Invalid password' })
+                if (!await bcrypt.compare(password, user.password)) {
+                    if (password !== user.password)
+                        return res.status(400).send({ error: 'Invalid password' })
+                }
             }
         }
 
@@ -125,6 +123,17 @@ router.post('/authenticate', async (req, res) => {
         return res.status(400).send({ "Err": 'Usuario sem senha' })
     }
 });
+
+router.post('passwordchange', async (req, res) => {
+    const { user, password, newpassword } = req.body;
+
+    try {
+
+    } catch (error) {
+
+    }
+
+})
 
 router.post('/booking', async (req, res) => {
     const { id, cultoId, answers } = req.body;
@@ -240,6 +249,12 @@ router.post('/checking', async (req, res) => {
     }
 })
 
+router.get('/geracode', async (req, res) => {
+    const { userId, cultoId } = req.query;
+
+    return res.send(await gerarCode(userId, cultoId))
+})
+
 router.put('/unbooking', async (req, res) => {
     const { id, cultoId } = req.body;
 
@@ -264,6 +279,8 @@ router.put('/unbooking', async (req, res) => {
 
         await Culto.updateOne({ "_id": cultoId }, { vagas: culto.vagas + 1 })
 
+        await User.findByIdAndUpdate({ "_id": id }, { "culto_id": undefined })
+
         console.log(`phsystem - unbooking: ID ${id} retirado do cultoId ${cultoId}`)
 
         History.create({
@@ -281,8 +298,10 @@ router.put('/unbooking', async (req, res) => {
     }
 })
 
-router.get('login'/ async (req, res) =>{
-    res.send("Hello World Login")
+router.get('/login', async (req, res) => {
+    const { cpf, password } = req.body;
+
+    return res.send(`Hello World Login ${cpf}`)
 })
 
 module.exports = app => app.use('/auth', router)

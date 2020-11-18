@@ -1,13 +1,13 @@
-const { hash } = require("bcryptjs");
-
 function mod(x, y) {
     return x - y * parseInt(String(x / y), 10)
 }
 
 function idToCode(id, interacao = 3) {
     let code;
+    code = ''
     const hash = "0123456789@ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-    numCaract = id.length
+    numCaract = String(id).length
+
     for (let index = 0; index < interacao; index++) {
         var numDec = parseInt(String(id).substr((index * (numCaract / interacao)), (numCaract / interacao)), 16)
         var restDivInt = mod(numDec, 63)
@@ -19,13 +19,14 @@ function idToCode(id, interacao = 3) {
 
 
 const gerarCode = async (userId, cultoId,) => {
+    let hash;
+    if (cultoId) {
+        hash = idToCode(userId) + idToCode(cultoId)
+    } else {
+        hash = idToCode(userId, 6)
+    }
 
-    console.log(userId)
-
-    hash = idToCode(userId)
-
-    const code = cultoId ? (`userId: ${userId} - cultoId: ${cultoId}`) : (`userId: ${userId} - com hash ${hash} - sem cultoId`)
-
+    const code = cultoId ? { userId: userId, cultoId: cultoId, token: hash } : { userId: userId, token: hash }
     return code
 }
 

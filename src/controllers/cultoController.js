@@ -15,8 +15,6 @@ router.get('/', async (req, res) => {
         .sort({ 'schedule': 1, 'createdAt': 1 })
         .limit((limit ? parseInt(limit) : 4))
 
-
-
     return res.send(culto)
 })
 

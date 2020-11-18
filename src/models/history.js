@@ -3,7 +3,8 @@ const mongoose = require('../database');
 // Schema === Tabela SQL
 const HistorySchema = new mongoose.Schema({
 
-    key: { type: String, required: true, unique: true },
+    key: { type: String, required: true },
+    type: { type: String, required: true },
 
     member_id: { ref: 'Member', type: mongoose.Schema.Types.ObjectId },
     culto_id: { ref: 'Culto', type: mongoose.Schema.Types.ObjectId },

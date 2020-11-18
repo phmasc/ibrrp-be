@@ -2,20 +2,9 @@ const mongoose = require('../database');
 const bcrypt = require('bcryptjs')
 
 const questionSchema = new mongoose.Schema({
-    '1': String,
-    '2': String,
-    '3': String,
-    '4': String,
-    '5': String,
-    '6': String,
-    '7': String,
-    '8': String,
-    '9': String,
-    '10': String,
-    '11': String,
-    '12': String,
-    '13': String,
-    '14': String,
+    question: String,
+    answer: String,
+    type: String,
 })
 
 const question = mongoose.model('question', questionSchema);
@@ -29,7 +18,7 @@ const MemberSchema = new mongoose.Schema({
     telefone: { type: String, required: true, },
     password: { type: String, select: false },
     token: { type: String, select: false },
-    questions: { ref: 'question', type: mongoose.Schema.Types.ObjectId, },
+    questions: [{ ref: 'question', type: mongoose.Schema.Types.ObjectId, }],
     culto_id: { ref: 'Culto', type: mongoose.Schema.Types.ObjectId },
     createdAt: { type: Date, default: Date.now, },
 });
