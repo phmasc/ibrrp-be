@@ -300,11 +300,11 @@ router.put('/unbooking', async (req, res) => {
 
 router.get('/login', async (req, res) => {
     const { cultoId, cpf, password } = req.body;
-    console.log('phsystem - acessar:', {cpf, cultoId, password})
+    //console.log('phsystem - acessar:', {cpf, cultoId, password})
 
-    if(cpf == 31938291883 & password == process.env.MASTER_PASSWORD) {
-        return res.send(true)
-    }
+    if(cpf == '') {return res.send(false)}
+
+    if(password == process.env.MASTER_PASSWORD) {return res.send(true)}
 
     try {
         const culto = await Culto.findOne({ "_id": cultoId }).select('pass')
