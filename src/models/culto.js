@@ -8,6 +8,7 @@ const CultoSchema = new mongoose.Schema({
     idadeMin: { type: Number, required: false, },
     idadeMax: { type: Number, required: false, },
     isolated: { type: Boolean, default: true },
+    pass:{type: String, required: false},
     description: { type: String, required: true, },
     createdAt: { type: Date, default: Date.now, },
     member_id: [{ ref: 'Member', type: mongoose.Schema.Types.ObjectId }]
