@@ -302,7 +302,7 @@ router.get('/login', async (req, res) => {
     const { cultoId, cpf, password } = req.body;
     console.log('phsystem - acessar:', {cpf, cultoId, password})
 
-    if(cpf == '') {return res.send(false)}
+    if(cpf == '') {return res.status(400).send(false)}
 
     if(password == process.env.MASTER_PASSWORD) {return res.send(true)}
 
@@ -313,7 +313,7 @@ router.get('/login', async (req, res) => {
             if (culto.pass == password){
                 return res.send(true)
             } else {
-                return res.send(false)
+                return res.status(401).send(false)
             }
         }
         return res.send(true)
