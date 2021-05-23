@@ -299,9 +299,27 @@ router.put('/unbooking', async (req, res) => {
 })
 
 router.get('/login', async (req, res) => {
-    const { cpf, password } = req.body;
+    const { cultoId, cpf, password } = req.body;
+    console.log('phsystem - acessar:', {cpf, cultoId, password})
 
-    return res.send(`Hello World Login ${cpf}`)
+    if(cpf == 31938291883 & password == process.env.MASTER_PASSWORD) {
+        return res.send(true)
+    }
+
+    try {
+        const culto = await Culto.findOne({ "_id": cultoId }).select('pass')
+
+        if(culto.pass){
+            if (culto.pass == password){
+                return res.send(true)
+            } else {
+                return res.send(false)
+            }
+        }
+        return res.send(true)
+    } catch (error) {
+        return res.send(false)
+    }
 })
 
 module.exports = app => app.use('/auth', router)
