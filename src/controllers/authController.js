@@ -300,7 +300,7 @@ router.put('/unbooking', async (req, res) => {
 
 router.get('/login', async (req, res) => {
     const { cultoId, cpf, password } = req.body;
-    //console.log('phsystem - acessar:', {cpf, cultoId, password})
+    console.log('phsystem - acessar:', {cpf, cultoId, password})
 
     if(cpf == '') {return res.send(false)}
 
