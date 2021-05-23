@@ -14,6 +14,6 @@ const CultoSchema = new mongoose.Schema({
     member_id: [{ ref: 'Member', type: mongoose.Schema.Types.ObjectId }]
 })
 
-const Culto = mongoose.model('Culto', CultoSchema);
+const Culto = mongoose.model('Culto', CultoSchegitma);
 
 module.exports = Culto;
