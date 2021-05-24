@@ -9,7 +9,11 @@ router.get('/', async (req, res) => {
     const { cultoId } = req.query;
 
     if (cultoId) {
-        const hist = await History.find({ culto_id: cultoId })
+        const hist = await History
+            .find({ culto_id: cultoId })
+            //.select('check temp')
+            .populate('member_id', 'name dtNascimento')
+            .populate('culto_id', 'isolated name schedule vagas description')
 
         return res.send({ hist })
     }

@@ -185,7 +185,9 @@ router.post('/booking', async (req, res) => {
                 key: (id + '-' + cultoId + '-ADD'),
                 type: 'ADD',
                 member_id: id,
-                culto_id: cultoId
+                culto_id: cultoId, 
+                check: false,
+                temp: false
             }).catch(err => console.log(err))
 
             await sendMail(user.email, `${email.title} para o ${culto.name} na data ${culto.schedule.toLocaleDateString()}`, email.description)
@@ -298,27 +300,27 @@ router.put('/unbooking', async (req, res) => {
     }
 })
 
-router.get('/login', async (req, res) => {
+router.post('/login', async (req, res) => {
     const { cultoId, cpf, password } = req.body;
     console.log('phsystem - acessar:', {cpf, cultoId, password})
 
-    if(cpf == '') {return res.status(412).send(false)}
+    if(cpf == '') {return res.status(412).send({status:false})}
 
-    if(password == process.env.MASTER_PASSWORD) {return res.send(true)}
+    if(password == process.env.MASTER_PASSWORD) {return res.send({status:true})}
 
     try {
         const culto = await Culto.findOne({ "_id": cultoId }).select('pass')
 
         if(culto.pass){
             if (culto.pass == password){
-                return res.send(true)
+                return res.send({status:true})
             } else {
-                return res.status(401).send(false)
+                return res.status(401).send({status:false})
             }
         }
-        return res.status(400).send(true)
+        return res.status(400).send({status:true})
     } catch (error) {
-        return res.send(false)
+        return res.send({status:false})
     }
 })
 
